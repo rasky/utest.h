@@ -115,9 +115,13 @@ typedef uint32_t utest_uint32_t;
 // define UTEST_USE_OLD_QPC before #include "utest.h" to use old
 // QueryPerformanceCounter
 #ifndef UTEST_USE_OLD_QPC
+#if defined(_MSC_VER)
 #pragma warning(push, 0)
+#endif
 #include <Windows.h>
+#if defined(_MSC_VER)
 #pragma warning(pop)
+#endif
 
 typedef LARGE_INTEGER utest_large_integer;
 #else
@@ -419,7 +423,12 @@ UTEST_WEAK UTEST_OVERLOADABLE void utest_type_printer(double d) {
 
 UTEST_WEAK UTEST_OVERLOADABLE void utest_type_printer(long double d);
 UTEST_WEAK UTEST_OVERLOADABLE void utest_type_printer(long double d) {
+  #ifndef __MINGW32__
   UTEST_PRINTF("%Lf", d);
+  #else
+  // By default, MinGW32 tries to be Microsoft CRT compatible, so long double == double.
+  UTEST_PRINTF("%f", d);
+  #endif
 }
 
 UTEST_WEAK UTEST_OVERLOADABLE void utest_type_printer(int i);
